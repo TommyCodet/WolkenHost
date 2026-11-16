@@ -30,6 +30,7 @@ class Bot(db.Model):
     port = db.Column(db.Integer, default=25565, nullable=False)
     version = db.Column(db.String(20), default='auto', nullable=False)
     command_afk = db.Column(db.Boolean, default=True, nullable=False)
+    startup_commands = db.Column(db.Text, default='', nullable=False)
     autoreconnect = db.Column(db.Boolean, default=True, nullable=False)
     status = db.Column(db.String(20), default='stopped', nullable=False)
     desired_state = db.Column(db.String(20), default='stopped', nullable=False, index=True)

@@ -109,10 +109,14 @@ def create_app():
    try:port=int(request.form.get('port','25565'))
    except ValueError:port=0
    version=request.form.get('version','auto')
-   if not 1<=port<=65535:flash('Port muss zwischen 1 und 65535 liegen.','error')
+   startup_commands=request.form.get('startup_commands','')
+   commands=[line.strip() for line in startup_commands.splitlines() if line.strip()]
+   invalid_commands=(len(commands)>10 or any(len(line)>100 or any(ord(ch)<32 for ch in line) for line in commands))
+   if invalid_commands:flash('Maximal 10 Startbefehle mit jeweils höchstens 100 Zeichen erlaubt.','error')
+   elif not 1<=port<=65535:flash('Port muss zwischen 1 und 65535 liegen.','error')
    elif version not in {'auto','1.21.1','1.20.4','1.19.4'}:flash('Ungültige Version.','error')
    else:
-    b=Bot(user_id=me().id,host=host,port=port,version=version,command_afk=request.form.get('command_afk')=='on',autoreconnect=request.form.get('autoreconnect')=='on');db.session.add(b);db.session.commit();return redirect(url_for('dashboard'))
+    b=Bot(user_id=me().id,host=host,port=port,version=version,command_afk=request.form.get('command_afk')=='on',startup_commands='\\n'.join(commands),autoreconnect=request.form.get('autoreconnect')=='on');db.session.add(b);db.session.commit();return redirect(url_for('dashboard'))
   return render_template('bot_new.html')
  def owned(bot_id):
   b=db.session.get(Bot,bot_id)

@@ -18,7 +18,7 @@ def resolve_public_host(host):
  except ValueError:
   try:
    ascii_host=host.encode('idna').decode('ascii')
-   if not re.fullmatch(r'(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?:\\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*',ascii_host):raise ValueError("Ungültiger DNS-Name.")
+   if not re.fullmatch(r'(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*',ascii_host):raise ValueError("Ungültiger DNS-Name.")
    addresses={ipaddress.ip_address(x[4][0]) for x in socket.getaddrinfo(ascii_host,None,type=socket.SOCK_STREAM)}
    host=ascii_host
   except (socket.gaierror,UnicodeError) as exc:raise ValueError("Server-Host kann nicht sicher aufgelöst werden.") from exc

@@ -38,7 +38,7 @@ function setStatus(status, message) {
 let bot;
 let stopping = false;
 let timer;
-let afkTimer;
+let startupTimers = [];
 function connect() {
   if (stopping) return;
   setStatus('connecting', 'Verbindung zum Minecraft-Server wird hergestellt');
@@ -47,11 +47,19 @@ function connect() {
   bot.once('login', () => {
     setStatus('running', 'Minecraft-Anmeldung erfolgreich');
     console.log('Minecraft login event received');
-    if (cfg.afkEnabled && cfg.afkCommand) {
-      afkTimer = setTimeout(() => {
-        if (bot && bot.player) bot.chat(String(cfg.afkCommand).slice(0, 100));
-      }, 2500);
-    }
+    const commands = Array.isArray(cfg.startupCommands) ? cfg.startupCommands :
+      (cfg.afkEnabled && cfg.afkCommand ? [cfg.afkCommand] : []);
+    commands.slice(0, 10).forEach((command, index) => {
+      const message = String(command || '').trim();
+      if (!message || message.length > 100 || /[\\x00-\\x1f]/.test(message)) return;
+      const timerId = setTimeout(() => {
+        if (!stopping && bot && bot.player) {
+          try { bot.chat(message); console.log('Sent startup command #' + (index + 1)); }
+          catch (error) { console.error('Startup command failed:', error.message); }
+        }
+      }, 2500 + index * 1500);
+      startupTimers.push(timerId);
+    });
   });
   bot.on('kicked', reason => {
     const message = String(reason).slice(0, 300);
@@ -63,7 +71,8 @@ function connect() {
     console.error('Minecraft connection error:', error.message);
   });
   bot.once('end', () => {
-    clearTimeout(afkTimer);
+    startupTimers.forEach(clearTimeout);
+    startupTimers = [];
     setStatus('offline', 'Verbindung beendet');
     console.log('Connection ended');
     if (!stopping && cfg.autoReconnect) timer = setTimeout(connect, delay);
@@ -73,7 +82,8 @@ function shutdown() {
   if (stopping) return;
   stopping = true;
   clearTimeout(timer);
-  clearTimeout(afkTimer);
+  startupTimers.forEach(clearTimeout);
+  startupTimers = [];
   setStatus('stopping', 'Bot wird beendet');
   if (bot) { try { bot.quit('WolkeHost stopping'); } catch (_) {} }
   setTimeout(() => process.exit(0), 700).unref();

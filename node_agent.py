@@ -39,6 +39,7 @@ def migrate_schema():
             'uptime_seconds': 'INTEGER NOT NULL DEFAULT 0',
             'last_heartbeat': 'DATETIME',
             'last_error': 'VARCHAR(500)',
+            'startup_commands': "TEXT NOT NULL DEFAULT ''",
         }
         for name, ddl in additions.items():
             if name not in cols:
@@ -58,7 +59,8 @@ class Supervisor:
         return {
             'serverHost': host, 'serverPort': int(bot.port),
             'mcVersion': bot.version, 'afkEnabled': bool(bot.command_afk),
-            'afkCommand': '/afk on' if bot.command_afk else '',
+            'startupCommands': (['/afk on'] if bot.command_afk else []) +
+                [line.strip() for line in (bot.startup_commands or '').splitlines() if line.strip()],
             'autoReconnect': bool(bot.autoreconnect), 'reconnectDelay': 10,
         }
 
