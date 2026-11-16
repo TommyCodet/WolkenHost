@@ -16,8 +16,8 @@
     {"name":"Minecraft Server Port","description":"Minecraft Java server TCP port.","env_variable":"SERVER_PORT","default_value":"25565","user_viewable":true,"user_editable":true,"rules":"required|integer|min:1|max:65535"},
     {"name":"Minecraft Version","description":"Use auto or a version supported by WolkeHost.","env_variable":"MC_VERSION","default_value":"auto","user_viewable":true,"user_editable":true,"rules":"required|string|in:auto,1.21.1,1.20.4,1.19.4"},
     {"name":"Send AFK Command","description":"Send AFK_COMMAND after login.","env_variable":"AFK_ENABLED","default_value":"true","user_viewable":true,"user_editable":true,"rules":"required|boolean"},
-    {"name":"AFK Command","description":"Command sent after successful login if enabled.","env_variable":"AFK_COMMAND","default_value":"/afk on","user_viewable":true,"user_editable":true,"rules":"nullable|string|max:100"},
+    {"name":"AFK Command","description":"Command sent after successful login if enabled.","env_variable":"AFK_COMMAND","default_value":"/afk on","user_viewable":true,"user_editable":false,"rules":"nullable|string|max:100"},
     {"name":"Automatic Reconnect","description":"Reconnect when the connection ends.","env_variable":"AUTO_RECONNECT","default_value":"true","user_viewable":true,"user_editable":true,"rules":"required|boolean"},
-    {"name":"Reconnect Delay (seconds)","description":"Reconnect delay; worker clamps values to 5–300 seconds.","env_variable":"RECONNECT_DELAY","default_value":"10","user_viewable":true,"user_editable":true,"rules":"required|integer|min:5|max:300"}
+    {"name":"Reconnect Delay (seconds)","description":"Reconnect delay; worker clamps values to 5–300 seconds.","env_variable":"RECONNECT_DELAY","default_value":"10","user_viewable":true,"user_editable":false,"rules":"required|integer|min:5|max:300"}
   ]
 }
