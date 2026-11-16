@@ -116,7 +116,7 @@ def create_app():
    elif not 1<=port<=65535:flash('Port muss zwischen 1 und 65535 liegen.','error')
    elif version not in {'auto','1.21.1','1.20.4','1.19.4'}:flash('Ungültige Version.','error')
    else:
-    b=Bot(user_id=me().id,host=host,port=port,version=version,command_afk=request.form.get('command_afk')=='on',startup_commands='\\n'.join(commands),autoreconnect=request.form.get('autoreconnect')=='on');db.session.add(b);db.session.commit();return redirect(url_for('dashboard'))
+    b=Bot(user_id=me().id,host=host,port=port,version=version,command_afk=request.form.get('command_afk')=='on',startup_commands='\n'.join(commands),autoreconnect=request.form.get('autoreconnect')=='on');db.session.add(b);db.session.commit();return redirect(url_for('dashboard'))
   return render_template('bot_new.html')
  def owned(bot_id):
   b=db.session.get(Bot,bot_id)
