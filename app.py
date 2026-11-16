@@ -79,7 +79,7 @@ def create_app():
   if 'microsoft' not in oauth._clients:abort(503)
   nonce=session.pop('oauth_nonce',None)
   if not nonce:abort(400)
-  token=oauth.microsoft.authorize_access_token();info=token.get('userinfo') or oauth.microsoft.parse_id_token(token,nonce=nonce)
+  token=oauth.microsoft.authorize_access_token();info=oauth.microsoft.parse_id_token(token,nonce=nonce)
   sub=info.get('sub');email=(info.get('email') or info.get('preferred_username') or '').strip().lower()
   if not sub or not email:abort(400)
   u=User.query.filter_by(microsoft_sub=sub).first()

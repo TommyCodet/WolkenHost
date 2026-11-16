@@ -14,6 +14,7 @@ class EggConfigTests(unittest.TestCase):
  def test_fixed_settings_are_not_editable_in_egg(self):
   self.assertFalse(self.vars['AFK_COMMAND']['user_editable'])
   self.assertFalse(self.vars['RECONNECT_DELAY']['user_editable'])
+  self.assertIn('raw.githubusercontent.com/TommyCodet/WolkenHost/main/bot.js',self.egg['scripts']['installation']['script'])
   self.assertIn('/afk on',self.panel)
   self.assertIn('10 Sekunden (fest)',self.panel)
  def test_supported_versions_match_panel_and_egg(self):
