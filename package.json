@@ -1,0 +1,1 @@
+{"name":"wolkenhost-worker","version":"0.1.0","private":true,"main":"bot.js","scripts":{"start":"node bot.js"},"dependencies":{"mineflayer":"^4.25.0"},"engines":{"node":">=20"}}
