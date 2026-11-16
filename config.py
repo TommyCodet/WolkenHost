@@ -15,7 +15,7 @@ BASE_URL=os.getenv('BASE_URL','http://127.0.0.1:5000').rstrip('/')
 NODE_ID=os.getenv('NODE_ID','local-1')
 TRUSTED_HOSTS=[x.strip() for x in os.getenv('TRUSTED_HOSTS','localhost,127.0.0.1').split(',') if x.strip()]
 def validate_settings():
- if len(SECRET_KEY)<32 or SECRET_KEY.lower() in {'change-me','dev-only-change-me','replace-with-long-random-secret'}:
+ if len(SECRET_KEY)<32 or SECRET_KEY.lower().startswith(('change-me','dev-only-change-me','replace-with-long-random-secret','paste_')):
   raise RuntimeError('FLASK_SECRET_KEY fehlt/ist unsicher. Bitte in .env einen zufälligen Schlüssel mit mindestens 32 Zeichen setzen.')
  if BASE_URL.startswith('https://') is False and os.getenv('WOLKEHOST_ALLOW_INSECURE_HTTP')!='1' and BASE_URL not in {'http://127.0.0.1:5000','http://localhost:5000'}:
   raise RuntimeError('Für externe Nutzung HTTPS in BASE_URL konfigurieren.')
