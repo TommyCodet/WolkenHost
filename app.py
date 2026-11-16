@@ -10,6 +10,7 @@ from config import *
 from models import db,User,Bot,Ticket
 from security import encrypt_secret,validate_host
 from worker import start_bot,stop_bot,restart_bot
+from node_agent import migrate_schema
 def create_app():
  validate_settings()
  app=Flask(__name__)
@@ -23,7 +24,9 @@ def create_app():
   oauth.register(name='microsoft',client_id=MICROSOFT_CLIENT_ID,client_secret=MICROSOFT_CLIENT_SECRET,
    server_metadata_url=f'https://login.microsoftonline.com/{MICROSOFT_TENANT}/v2.0/.well-known/openid-configuration',
    client_kwargs={'scope':'openid email profile offline_access'})
- with app.app_context():db.create_all()
+ with app.app_context():
+  db.create_all()
+  migrate_schema()
  def me():
   uid=session.get('uid');return db.session.get(User,uid) if uid else None
  def login_required(fn):

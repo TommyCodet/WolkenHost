@@ -6,8 +6,6 @@ import subprocess
 import sys
 import time
 from datetime import datetime, timezone
-from pathlib import Path
-
 from config import BASE_DIR, DATABASE_URL
 from models import db, Bot
 from flask import Flask
@@ -52,16 +50,16 @@ class Supervisor:
         self.data_dir = BASE_DIR / 'data'
         self.data_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
+    def _status_path(self, bot_id):
+        return self.data_dir / f'bot-{bot_id}.status.json'
+
     def _config(self, bot):
         host, _addresses = resolve_public_host(bot.host)
         return {
-            'serverHost': host,
-            'serverPort': int(bot.port),
-            'mcVersion': bot.version,
-            'afkEnabled': bool(bot.command_afk),
+            'serverHost': host, 'serverPort': int(bot.port),
+            'mcVersion': bot.version, 'afkEnabled': bool(bot.command_afk),
             'afkCommand': '/afk on' if bot.command_afk else '',
-            'autoReconnect': bool(bot.autoreconnect),
-            'reconnectDelay': 10,
+            'autoReconnect': bool(bot.autoreconnect), 'reconnectDelay': 10,
         }
 
     def _stop(self, bot_id):
@@ -77,6 +75,10 @@ class Supervisor:
                 proc.kill()
                 proc.wait(timeout=3)
         log.close()
+        try:
+            self._status_path(bot_id).unlink(missing_ok=True)
+        except OSError:
+            pass
 
     def _start(self, bot):
         cfg = self._config(bot)
@@ -88,8 +90,11 @@ class Supervisor:
         auth_home = self.data_dir / f'auth-{bot.id}'
         auth_home.mkdir(mode=0o700, parents=True, exist_ok=True)
         os.chmod(auth_home, 0o700)
+        status_path = self._status_path(bot.id)
+        status_path.unlink(missing_ok=True)
         log = open(self.data_dir / f'bot-{bot.id}.log', 'a', encoding='utf-8')
-        env = {**os.environ, 'HOME': str(auth_home), 'WOLKEHOST_BOT_ID': str(bot.id)}
+        env = {**os.environ, 'HOME': str(auth_home), 'WOLKEHOST_BOT_ID': str(bot.id),
+               'WOLKEHOST_STATUS_FILE': str(status_path)}
         try:
             proc = subprocess.Popen(
                 ['node', str(BASE_DIR / 'bot.js'), str(path)],
@@ -144,6 +149,20 @@ class Supervisor:
                     bot.status = 'error'
                     bot.last_error = str(exc)[:500]
                     bot.pid = None
+            elif proc:
+                status_path = self._status_path(bot.id)
+                try:
+                    state = json.loads(status_path.read_text(encoding='utf-8'))
+                    if state.get('status') in {'connecting', 'running', 'offline', 'error', 'stopping'}:
+                        bot.status = state['status']
+                        bot.last_error = state.get('message') if state['status'] == 'error' else None
+                except (OSError, ValueError, TypeError):
+                    pass
+            if bot.started_at:
+                started = bot.started_at
+                if started.tzinfo is None:
+                    started = started.replace(tzinfo=timezone.utc)
+                bot.uptime_seconds = max(0, int((utcnow() - started).total_seconds()))
         db.session.commit()
 
     def shutdown(self):
