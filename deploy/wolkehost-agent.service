@@ -1,0 +1,24 @@
+[Unit]
+Description=WolkeHost Minecraft Bot Node Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=wolkehost
+Group=wolkehost
+WorkingDirectory=/opt/wolkehost
+EnvironmentFile=/opt/wolkehost/.env
+ExecStart=/opt/wolkehost/.venv/bin/python /opt/wolkehost/node_agent.py
+Restart=always
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/wolkehost/data
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target
